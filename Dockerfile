@@ -1,30 +1,26 @@
-FROM debian:11-slim
+FROM alpine:latest
 
 LABEL org.opencontainers.image.title='packer_ansible_build'
 LABEL org.opencontainers.image.description="A Docker image Ansible"
-LABEL org.opencontainers.image.authors='gautier.loterman@wescale.fr'
+LABEL org.opencontainers.image.authors='oss@wescale.fr'
 LABEL org.opencontainers.image.source='https://github.com/gloterman/ansible_build.git'
 
-ENV LC_ALL=C.UTF-8
-ENV LANG=C.UTF-8
+MAINTAINER <oss@wescale.fr>
 
-ARG ANSIBLE_VERSION
-ARG JINJA_VERSION
-ARG NETADDR_VERSION
-ARG BOTO3_VERSION
+RUN apk --no-cache update && apk --no-cache upgrade
 
-RUN apt-get update \
-  && apt-get install -y wget curl git libssl-dev unzip \
-       python3 python3-distutils python3-pip \
-  && pip3 install ansible-core==${ANSIBLE_VERSION} \
-  && pip3 install jinja2==${JINJA_VERSION} \
-  && pip3 install netaddr==${NETADDR_VERSION} \
-  && pip3 install boto3==${BOTO3_VERSION} \
-  && pip3 install markupsafe==2.0.1 \
-  && apt-get clean all \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apk --no-cache add \
+    python3 py3-pip py3-setuptools py3-wheel
 
+RUN apk --no-cache add --virtual \
+      ansible-build-dependencies python3-dev \
+      libffi-dev openssl-dev gcc musl-dev && \
+    pip install --no-cache-dir -U \
+      pip setuptools wheel && \
+    pip install --no-cache-dir ansible-core && \
+    apk del ansible-build-dependencies
 
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-RUN unzip awscliv2.zip
-RUN ./aws/install
+ENV ANSIBLE_HOST_KEY_CHECKING False
+
+ENTRYPOINT ["/bin/sh"]
+
