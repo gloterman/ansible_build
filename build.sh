@@ -3,7 +3,7 @@
 
 source .env
 
-docker build -t ansible_build -f Dockerfile \
+docker build -t ansible_build_alpine -f Dockerfile \
     --build-arg ANSIBLE_VERSION=${ANSIBLE_VERSION} \
     --build-arg JINJA_VERSION=${JINJA_VERSION} \
     --build-arg NETADDR_VERSION=${NETADDR_VERSION} \
